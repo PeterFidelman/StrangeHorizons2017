@@ -2,8 +2,9 @@
 Calibe recipe to download issues of the Strange Horizons online speculative
 fiction magazine.
 
-Before each use, change the variable "dateStr" (on line 12) to reflect the date
-of the issue that you would like to fetch.  
+Running this script will download the latest issue.  Alternately, set the
+variable "dateStr" (on line 45) to reflect the date of the issue that you would
+like to fetch.  For example:
 
     dateStr = "4-july-2005"
 

@@ -7,13 +7,8 @@ from calibre.web.feeds.news import BasicNewsRecipe
 
 
 class StrangeHorizons(BasicNewsRecipe):
-	# Change this to control what issue to grab.  Must be of the format
-	# D-month-YYYY; for example, "4-july-2005".
-	dateStr = "4-july-2005"
-
 	# Recipe metadata
-	INDEX = "http://strangehorizons.com/issue/%s/" % dateStr
-	title = "Strange Horizons %s" % dateStr
+	title = "Strange Horizons"
 	description = "A magazine of speculative fiction and related nonfiction. Best downloaded on weekends"
 	publication_type = "magazine"
 	language = "en"
@@ -32,8 +27,25 @@ class StrangeHorizons(BasicNewsRecipe):
 	no_stylesheets = True
 	extra_css = """div.image-left { margin: 0.5em auto 1em auto; } div.image-right { margin: 0.5em auto 1em auto; } div.illustration { margin: 0.5em auto 1em auto; text-align: center; } p.image-caption { margin-top: 0.25em; margin-bottom: 1em; font-size: 75%; text-align: center; } h1 { font-size: 160%; } h2 { font-size: 110%; } h3 { font-size: 85%; } h4 { font-size: 80%; } p { font-size: 90%; margin: 1em 1em 1em 15px; } p.author-bio { font-size: 75%; font-style: italic; margin: 1em 1em 1em 15px; } p.author-bio i, p.author-bio cite, p.author-bio .foreign { font-style: normal; } p.author-copyright { font-size: 75%; text-align: center; margin: 3em 1em 1em 15px; } p.content-date { font-weight: bold; } p.dedication { font-style: italic; } div.stanza { margin-bottom: 1em; } div.stanza p { margin: 0px 1em 0px 15px; font-size: 90%; } p.verse-line { margin-bottom: 0px; margin-top: 0px; } p.verse-line-indent-1 { margin-bottom: 0px; margin-top: 0px; text-indent: 2em; } p.verse-line-indent-2 { margin-bottom: 0px; margin-top: 0px; text-indent: 4em; } p.verse-stanza-break { margin-bottom: 0px; margin-top: 0px; } .foreign { font-style: italic; } .thought { font-style: italic; } .thought cite { font-style: normal; } .thought em { font-style: normal; } blockquote { font-size: 90%; font-style: italic; } blockquote cite { font-style: normal; } blockquote em { font-style: normal; } blockquote .foreign { font-style: normal; } blockquote .thought { font-style: normal; } .speaker { font-weight: bold; } pre { margin-left: 15px; } div.screenplay { font-family: monospace; } blockquote.screenplay-dialogue { font-style: normal; font-size: 100%; } .screenplay p.dialogue-first { margin-top: 0; } .screenplay p.speaker { margin-bottom: 0; text-align: center; font-weight: normal; } blockquote.typed-letter { font-style: normal; font-size: 100%; font-family: monospace; } .no-italics { font-style: normal; }"""
 
+	def get_date(self):
+		frontSoup = self.index_to_soup("http://strangehorizons.com")
+		dateDiv = frontSoup.find("div",
+			attrs={"class": "current-issue-widget issue-medium issue"})
+		url = dateDiv.a["href"]
+		date = url.split('/')[-2]
+		return date
+
+
 	def parse_index(self):
-		soup = self.index_to_soup(self.INDEX)
+		# Change this to control what issue to grab.  Must be of the format
+		# D-month-YYYY; for example, "4-july-2005".  Alternately, use
+		# self.get_date() to retrieve the latest issue.
+
+		dateStr = self.get_date();
+		#dateStr = "4-july-2005"
+
+		issueUrl = "http://strangehorizons.com/issue/%s/" % dateStr
+		soup = self.index_to_soup(issueUrl)
 
 		sections = OrderedDict()
 
@@ -80,7 +92,7 @@ class StrangeHorizons(BasicNewsRecipe):
 						"author": authorStr,
 						"url": url,
 						"description": "",
-						"date": self.dateStr,
+						"date": dateStr,
 						})
 
 			#
@@ -108,7 +120,7 @@ class StrangeHorizons(BasicNewsRecipe):
 				#print url
 				#print authorStr
 				#print excerptStr
-				#print self.dateStr
+				#print dateStr
 
 				if categoryStr not in sections:
 					sections[categoryStr] = []
@@ -117,6 +129,6 @@ class StrangeHorizons(BasicNewsRecipe):
 					"author": authorStr,
 					"url": url,
 					"description": excerptStr,
-					"date": self.dateStr,
+					"date": dateStr,
 					})
 		return sections.items()
